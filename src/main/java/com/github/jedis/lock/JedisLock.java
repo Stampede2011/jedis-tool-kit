@@ -3,6 +3,7 @@ package com.github.jedis.lock;
 import java.util.UUID;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
 
 /**
@@ -18,6 +19,7 @@ public class JedisLock {
     public static final int DEFAULT_EXPIRY_TIME_MILLIS = Integer.getInteger("com.github.jedis.lock.expiry.millis", 60 * ONE_SECOND);
     public static final int DEFAULT_ACQUIRE_TIMEOUT_MILLIS = Integer.getInteger("com.github.jedis.lock.acquiry.millis", 10 * ONE_SECOND);
     public static final int DEFAULT_ACQUIRY_RESOLUTION_MILLIS = Integer.getInteger("com.github.jedis.lock.acquiry.resolution.millis", 100);
+
     // Note: index of key&argv starts from 1
     private static final String COMMAND_LOCK =
             "if (redis.call('exists', KEYS[1]) == 0) then " +
@@ -53,7 +55,7 @@ public class JedisLock {
             "end; " +
             "return nil;";
 
-    private final JedisPool pool;
+    private final BasicClient client;
 
     private final String lockKeyPath;
 
@@ -66,8 +68,9 @@ public class JedisLock {
     /**
      * Detailed constructor with default acquire timeout 10000 msecs and lock
      * expiration of 60000 msecs.
-     * 
+     *
      * @param pool
+     *            JedisPool
      * @param lockKey
      *            lock key (ex. account:1, ...)
      */
@@ -76,22 +79,10 @@ public class JedisLock {
     }
 
     /**
-     * Detailed constructor with default lock expiration of 60000 msecs.
-     * 
-     * @param pool
-     * @param lockKey
-     *            lock key (ex. account:1, ...)
-     * @param acquireTimeoutMillis
-     *            acquire timeout in miliseconds (default: 10000 msecs)
-     */
-    public JedisLock(JedisPool pool, String lockKey, int acquireTimeoutMillis) {
-        this(pool, lockKey, acquireTimeoutMillis, DEFAULT_EXPIRY_TIME_MILLIS);
-    }
-
-    /**
      * Detailed constructor.
-     * 
+     *
      * @param pool
+ *                JedisPool
      * @param lockKey
      *            lock key (ex. account:1, ...)
      * @param acquireTimeoutMillis
@@ -100,13 +91,94 @@ public class JedisLock {
      *            lock expiration in miliseconds (default: 60000 msecs)
      */
     public JedisLock(JedisPool pool, String lockKey, int acquireTimeoutMillis, int expiryTimeMillis) {
-        this(pool, lockKey, acquireTimeoutMillis, expiryTimeMillis, UUID.randomUUID());
+        this.client = new PooledClient(pool);
+        this.lockKeyPath = lockKey;
+        this.acquiryTimeoutInMillis = acquireTimeoutMillis;
+        this.lockExpiryInMillis = expiryTimeMillis+1;
+        this.lockUUID = UUID.randomUUID();
+    }
+
+    /**
+     * Detailed constructor with default acquire timeout 10000 msecs and lock
+     * expiration of 60000 msecs.
+     *
+     * @param cluster
+     *            JedisCluster
+     * @param lockKey
+     *            lock key (ex. account:1, ...)
+     */
+    public JedisLock(JedisCluster cluster, String lockKey) {
+        this(cluster, lockKey, DEFAULT_ACQUIRE_TIMEOUT_MILLIS, DEFAULT_EXPIRY_TIME_MILLIS);
+    }
+
+    /**
+     * Detailed constructor.
+     *
+     * @param cluster
+     *            JedisCluster
+     * @param lockKey
+     *            lock key (ex. account:1, ...)
+     * @param acquireTimeoutMillis
+     *            acquire timeout in miliseconds (default: 10000 msecs)
+     * @param expiryTimeMillis
+     *            lock expiration in miliseconds (default: 60000 msecs)
+     */
+    public JedisLock(JedisCluster cluster, String lockKey, int acquireTimeoutMillis, int expiryTimeMillis) {
+        this.client = new ClusterClient(cluster);
+        this.lockKeyPath = lockKey;
+        this.acquiryTimeoutInMillis = acquireTimeoutMillis;
+        this.lockExpiryInMillis = expiryTimeMillis+1;
+        this.lockUUID = UUID.randomUUID();
+    }
+
+    /**
+     * Detailed constructor with default acquire timeout 10000 msecs and lock
+     * expiration of 60000 msecs.
+     *
+     * @param client
+     *            BasicClient
+     * @param lockKey
+     *            lock key (ex. account:1, ...)
+     */
+    public JedisLock(BasicClient client, String lockKey) {
+        this(client, lockKey, DEFAULT_ACQUIRE_TIMEOUT_MILLIS, DEFAULT_EXPIRY_TIME_MILLIS);
+    }
+
+    /**
+     * Detailed constructor with default lock expiration of 60000 msecs.
+     *
+     * @param client
+     *            BasicClient
+     * @param lockKey
+     *            lock key (ex. account:1, ...)
+     * @param acquireTimeoutMillis
+     *            acquire timeout in miliseconds (default: 10000 msecs)
+     */
+    public JedisLock(BasicClient client, String lockKey, int acquireTimeoutMillis) {
+        this(client, lockKey, acquireTimeoutMillis, DEFAULT_EXPIRY_TIME_MILLIS);
     }
 
     /**
      * Detailed constructor.
      * 
-     * @param pool
+     * @param client
+     *            BasicClient
+     * @param lockKey
+     *            lock key (ex. account:1, ...)
+     * @param acquireTimeoutMillis
+     *            acquire timeout in miliseconds (default: 10000 msecs)
+     * @param expiryTimeMillis
+     *            lock expiration in miliseconds (default: 60000 msecs)
+     */
+    public JedisLock(BasicClient client, String lockKey, int acquireTimeoutMillis, int expiryTimeMillis) {
+        this(client, lockKey, acquireTimeoutMillis, expiryTimeMillis, UUID.randomUUID());
+    }
+
+    /**
+     * Detailed constructor.
+     * 
+     * @param client
+     *            BasicClient
      * @param lockKey
      *            lock key (ex. account:1, ...)
      * @param acquireTimeoutMillis
@@ -116,12 +188,12 @@ public class JedisLock {
      * @param uuid
      *            unique identification of this lock
      */
-    public JedisLock(JedisPool pool, String lockKey, int acquireTimeoutMillis, int expiryTimeMillis, UUID uuid) {
-        this.pool = pool;
+    public JedisLock(BasicClient client, String lockKey, int acquireTimeoutMillis, int expiryTimeMillis, UUID uuid) {
+        this.client = client;
         this.lockKeyPath = lockKey;
         this.acquiryTimeoutInMillis = acquireTimeoutMillis;
         this.lockExpiryInMillis = expiryTimeMillis+1;
-        this.lockUUID = uuid;;
+        this.lockUUID = uuid;
     }
     
     /**
@@ -146,7 +218,7 @@ public class JedisLock {
     public boolean acquire() {
         int timeout = acquiryTimeoutInMillis;
         while (timeout >= 0) {
-            Object result = eval(COMMAND_LOCK, 1, lockKeyPath, getId(), lockExpiryInMillis + "");
+            Object result = client.eval(COMMAND_LOCK, 1, lockKeyPath, getId(), lockExpiryInMillis + "");
             if (result == null) {
                 timeout -= DEFAULT_ACQUIRY_RESOLUTION_MILLIS;
                 try {
@@ -169,7 +241,7 @@ public class JedisLock {
      * @return true if lock is acquired, false otherwise
      */
     public boolean renew() {
-        Object result = eval(COMMAND_RENEW, 1, lockKeyPath, getId(), lockExpiryInMillis + "");
+        Object result = client.eval(COMMAND_RENEW, 1, lockKeyPath, getId(), lockExpiryInMillis + "");
         return (result != null);
     }
 
@@ -177,7 +249,7 @@ public class JedisLock {
      * Acquired lock release.
      */
     public void release() {
-        Object result = eval(COMMAND_UNLOCK, 1, lockKeyPath, getId(), lockExpiryInMillis+"");
+        Object result = client.eval(COMMAND_UNLOCK, 1, lockKeyPath, getId(), lockExpiryInMillis + "");
         if (result == null) {
             this.counter = 0;
         } else {
@@ -195,22 +267,55 @@ public class JedisLock {
      * @return  the expiry time in millis (or null if not locked)
      */
     public long getLockExpiryTimeInMillis() {
-        return (Long)execute((Jedis jedis)->jedis.pttl(lockKeyPath));
+        return client.pttl(lockKeyPath);
     }
 
     public String getId() {
         return lockUUID + "-" + Thread.currentThread().getId();
     }
 
-    public Object execute(RedisCallback callback) {
-        // Assure that the resources will be closed after execution
-        try (Jedis jedis = pool.getResource()) {
-            return callback.doWithRedis(jedis);
+    public class ClusterClient implements BasicClient {
+        private JedisCluster cluster;
+
+        public ClusterClient(JedisCluster cluster) { this.cluster = cluster; }
+
+        @Override
+        public Object eval(String script, int keyCount, String... params) {
+            return cluster.eval(script, keyCount, params);
+        }
+
+        @Override
+        public Long pttl(String key) {
+            return cluster.pttl(key);
         }
     }
 
-    public Object eval(String script, int keyCount, String ... params) {
-        return execute((Jedis jedis)->jedis.eval(script, keyCount, params));
+    public class PooledClient implements BasicClient {
+        private JedisPool pool;
+
+        public PooledClient(JedisPool pool) { this.pool = pool; }
+
+        @Override
+        public Object eval(String script, int keyCount, String... params) {
+            return execute((Jedis jedis)->jedis.eval(script, keyCount, params));
+        }
+
+        @Override
+        public Long pttl(String key) {
+            return (Long)execute((Jedis jedis)->jedis.pttl(key));
+        }
+
+        public Object execute(RedisCallback callback) {
+            // Assure that the resources will be closed after execution
+            try (Jedis jedis = pool.getResource()) {
+                return callback.doWithRedis(jedis);
+            }
+        }
+    }
+
+    public interface BasicClient {
+        Object eval(final String script, final int keyCount, final String... params);
+        Long pttl(final String key);
     }
 
     public interface RedisCallback {
