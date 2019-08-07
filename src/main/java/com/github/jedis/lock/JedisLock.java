@@ -3,24 +3,57 @@ package com.github.jedis.lock;
 import java.util.UUID;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 /**
  * Redis distributed lock implementation
  * (fork by  Bruno Bossola <bbossola@gmail.com>)
+ * (fork by  Milton Lai <millton.lai@gmail.com>)
  * 
  * @author Alois Belaska <alois.belaska@gmail.com>
  */
 public class JedisLock {
 
-    private static final Lock NO_LOCK = new Lock(new UUID(0l,0l), 0l);
-    
-    private static final int ONE_SECOND = 1000;
-
+    public static final int ONE_SECOND = 1000;
     public static final int DEFAULT_EXPIRY_TIME_MILLIS = Integer.getInteger("com.github.jedis.lock.expiry.millis", 60 * ONE_SECOND);
     public static final int DEFAULT_ACQUIRE_TIMEOUT_MILLIS = Integer.getInteger("com.github.jedis.lock.acquiry.millis", 10 * ONE_SECOND);
     public static final int DEFAULT_ACQUIRY_RESOLUTION_MILLIS = Integer.getInteger("com.github.jedis.lock.acquiry.resolution.millis", 100);
+    // Note: index of key&argv starts from 1
+    private static final String COMMAND_LOCK =
+            "if (redis.call('exists', KEYS[1]) == 0) then " +
+                "redis.call('hset', KEYS[1], ARGV[1], 1); " +
+                "redis.call('pexpire', KEYS[1], ARGV[2]); " +
+                "return 1; " +
+            "end; " +
+            "if (redis.call('hexists', KEYS[1], ARGV[1]) == 1) then " +
+                "local counter = redis.call('hincrby', KEYS[1], ARGV[1], 1); " +
+                "redis.call('pexpire', KEYS[1], ARGV[2]); " +
+                "return counter; " +
+            "end; " +
+            "return nil;";
 
-    private final Jedis jedis;
+    private static final String COMMAND_UNLOCK =
+            "if (redis.call('hexists', KEYS[1], ARGV[1]) == 0) then " +
+                "return nil;" +
+            "end; " +
+            "local counter = redis.call('hincrby', KEYS[1], ARGV[1], -1); " +
+            "if (counter > 0) then " +
+                "redis.call('pexpire', KEYS[1], ARGV[2]); " +
+                "return counter; " +
+            "else " +
+                "redis.call('del', KEYS[1]); " +
+                "return 0; "+
+            "end; " +
+            "return nil;";
+
+    private static final String COMMAND_RENEW =
+            "if (redis.call('hexists', KEYS[1], ARGV[1]) == 1) then " +
+                "redis.call('pexpire', KEYS[1], ARGV[2]); " +
+                "return 1; " +
+            "end; " +
+            "return nil;";
+
+    private final JedisPool pool;
 
     private final String lockKeyPath;
 
@@ -28,80 +61,37 @@ public class JedisLock {
     private final int acquiryTimeoutInMillis;
     private final UUID lockUUID;
 
-    private Lock lock = null;
+    private volatile long counter;
 
-    protected static class Lock {
-        private UUID uuid;
-        private long expiryTime;
-
-        protected Lock(UUID uuid, long expiryTimeInMillis) {
-            this.uuid = uuid;
-            this.expiryTime = expiryTimeInMillis;
-        }
-        
-        protected static Lock fromString(String text) {
-            try {
-                String[] parts = text.split(":");
-                UUID theUUID = UUID.fromString(parts[0]);
-                long theTime = Long.parseLong(parts[1]);
-                return new Lock(theUUID, theTime);
-            } catch (Exception any) {
-                return NO_LOCK;
-            }
-        }
-        
-        public UUID getUUID() {
-            return uuid;
-        }
-
-        public long getExpiryTime() {
-            return expiryTime;
-        }
-        
-        @Override
-        public String toString() {
-            return uuid.toString()+":"+expiryTime;  
-        }
-
-        boolean isExpired() {
-            return getExpiryTime() < System.currentTimeMillis();
-        }
-
-        boolean isExpiredOrMine(UUID otherUUID) {
-            return this.isExpired() || this.getUUID().equals(otherUUID);
-        }
-    }
-    
-    
     /**
      * Detailed constructor with default acquire timeout 10000 msecs and lock
      * expiration of 60000 msecs.
      * 
-     * @param jedis
+     * @param pool
      * @param lockKey
      *            lock key (ex. account:1, ...)
      */
-    public JedisLock(Jedis jedis, String lockKey) {
-        this(jedis, lockKey, DEFAULT_ACQUIRE_TIMEOUT_MILLIS, DEFAULT_EXPIRY_TIME_MILLIS);
+    public JedisLock(JedisPool pool, String lockKey) {
+        this(pool, lockKey, DEFAULT_ACQUIRE_TIMEOUT_MILLIS, DEFAULT_EXPIRY_TIME_MILLIS);
     }
 
     /**
      * Detailed constructor with default lock expiration of 60000 msecs.
      * 
-     * @param jedis
+     * @param pool
      * @param lockKey
      *            lock key (ex. account:1, ...)
      * @param acquireTimeoutMillis
      *            acquire timeout in miliseconds (default: 10000 msecs)
      */
-    public JedisLock(Jedis jedis, String lockKey, int acquireTimeoutMillis) {
-        this(jedis, lockKey, acquireTimeoutMillis, DEFAULT_EXPIRY_TIME_MILLIS);
+    public JedisLock(JedisPool pool, String lockKey, int acquireTimeoutMillis) {
+        this(pool, lockKey, acquireTimeoutMillis, DEFAULT_EXPIRY_TIME_MILLIS);
     }
 
     /**
      * Detailed constructor.
      * 
-     * @param jedis
+     * @param pool
      * @param lockKey
      *            lock key (ex. account:1, ...)
      * @param acquireTimeoutMillis
@@ -109,14 +99,14 @@ public class JedisLock {
      * @param expiryTimeMillis
      *            lock expiration in miliseconds (default: 60000 msecs)
      */
-    public JedisLock(Jedis jedis, String lockKey, int acquireTimeoutMillis, int expiryTimeMillis) {
-        this(jedis, lockKey, acquireTimeoutMillis, expiryTimeMillis, UUID.randomUUID());
+    public JedisLock(JedisPool pool, String lockKey, int acquireTimeoutMillis, int expiryTimeMillis) {
+        this(pool, lockKey, acquireTimeoutMillis, expiryTimeMillis, UUID.randomUUID());
     }
 
     /**
      * Detailed constructor.
      * 
-     * @param jedis
+     * @param pool
      * @param lockKey
      *            lock key (ex. account:1, ...)
      * @param acquireTimeoutMillis
@@ -126,8 +116,8 @@ public class JedisLock {
      * @param uuid
      *            unique identification of this lock
      */
-    public JedisLock(Jedis jedis, String lockKey, int acquireTimeoutMillis, int expiryTimeMillis, UUID uuid) {
-        this.jedis = jedis;
+    public JedisLock(JedisPool pool, String lockKey, int acquireTimeoutMillis, int expiryTimeMillis, UUID uuid) {
+        this.pool = pool;
         this.lockKeyPath = lockKey;
         this.acquiryTimeoutInMillis = acquireTimeoutMillis;
         this.lockExpiryInMillis = expiryTimeMillis+1;
@@ -152,45 +142,24 @@ public class JedisLock {
      * Acquire lock.
      * 
      * @return true if lock is acquired, false acquire timeouted
-     * @throws InterruptedException
-     *             in case of thread interruption
      */
-    public synchronized boolean acquire() throws InterruptedException {
-        return acquire(jedis);
-    }
-
-    /**
-     * Acquire lock.
-     * 
-     * @param jedis
-     * @return true if lock is acquired, false acquire timeouted
-     * @throws InterruptedException
-     *             in case of thread interruption
-     */
-    protected synchronized boolean acquire(Jedis jedis) throws InterruptedException {
+    public boolean acquire() {
         int timeout = acquiryTimeoutInMillis;
         while (timeout >= 0) {
-
-            final Lock newLock = asLock(System.currentTimeMillis() + lockExpiryInMillis);
-            if (jedis.setnx(lockKeyPath, newLock.toString()) == 1) {
-                this.lock = newLock;
+            Object result = eval(COMMAND_LOCK, 1, lockKeyPath, getId(), lockExpiryInMillis + "");
+            if (result == null) {
+                timeout -= DEFAULT_ACQUIRY_RESOLUTION_MILLIS;
+                try {
+                    Thread.sleep(DEFAULT_ACQUIRY_RESOLUTION_MILLIS);
+                } catch (InterruptedException e) {
+                    // Do nothing
+                }
+            } else {
+                this.counter = (Long)result;
                 return true;
             }
 
-            final String currentValueStr = jedis.get(lockKeyPath);
-            final Lock currentLock = Lock.fromString(currentValueStr);
-            if (currentLock.isExpiredOrMine(lockUUID)) {
-                String oldValueStr = jedis.getSet(lockKeyPath, newLock.toString());
-                if (oldValueStr != null && oldValueStr.equals(currentValueStr)) {
-                    this.lock = newLock;
-                    return true;
-                }
-            }
-
-            timeout -= DEFAULT_ACQUIRY_RESOLUTION_MILLIS;
-            Thread.sleep(DEFAULT_ACQUIRY_RESOLUTION_MILLIS);
         }
-
         return false;
     }
 
@@ -198,56 +167,53 @@ public class JedisLock {
      * Renew lock.
      * 
      * @return true if lock is acquired, false otherwise
-     * @throws InterruptedException
-     *             in case of thread interruption
      */
-    public boolean renew() throws InterruptedException {
-        final Lock lock = Lock.fromString(jedis.get(lockKeyPath));
-        if (!lock.isExpiredOrMine(lockUUID)) {
-            return false;
-        }
-
-        return acquire(jedis);
+    public boolean renew() {
+        Object result = eval(COMMAND_RENEW, 1, lockKeyPath, getId(), lockExpiryInMillis + "");
+        return (result != null);
     }
 
     /**
      * Acquired lock release.
      */
-    public synchronized void release() {
-        release(jedis);
-    }
-
-    /**
-     * Acquired lock release.
-     * @param jedis
-     */
-    protected synchronized void release(Jedis jedis) {
-        if (isLocked()) {
-            jedis.del(lockKeyPath);
-            this.lock = null;
+    public void release() {
+        Object result = eval(COMMAND_UNLOCK, 1, lockKeyPath, getId(), lockExpiryInMillis+"");
+        if (result == null) {
+            this.counter = 0;
+        } else {
+            this.counter = (Long)result;
         }
     }
 
     /**
-     * Check if owns the lock
-     * @return  true if lock owned
+     * Lock threads counter
      */
-    public synchronized boolean isLocked() {
-        return this.lock != null;
-    }
-    
+    public long getCounter() { return counter; }
+
     /**
      * Returns the expiry time of this lock
      * @return  the expiry time in millis (or null if not locked)
      */
-    public synchronized long getLockExpiryTimeInMillis() {
-        return this.lock.getExpiryTime();
-    }
-    
-    
-    private Lock asLock(long expires) {
-        return new Lock(lockUUID, expires);
+    public long getLockExpiryTimeInMillis() {
+        return (Long)execute((Jedis jedis)->jedis.pttl(lockKeyPath));
     }
 
+    public String getId() {
+        return lockUUID + "-" + Thread.currentThread().getId();
+    }
 
+    public Object execute(RedisCallback callback) {
+        // Assure that the resources will be closed after execution
+        try (Jedis jedis = pool.getResource()) {
+            return callback.doWithRedis(jedis);
+        }
+    }
+
+    public Object eval(String script, int keyCount, String ... params) {
+        return execute((Jedis jedis)->jedis.eval(script, keyCount, params));
+    }
+
+    public interface RedisCallback {
+        Object doWithRedis(Jedis var1);
+    }
 }

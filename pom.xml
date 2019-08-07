@@ -11,10 +11,10 @@
 	<groupId>com.github.jedis-lock</groupId>
 	<artifactId>jedis-lock</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.2-SNAPSHOT</version>
 	<name>Jedis Lock</name>
 	<description>Jedis distributed lock support</description>
-	<inceptionYear>2011</inceptionYear>
+	<inceptionYear>2019</inceptionYear>
 
 	<licenses>
 		<license>
@@ -26,22 +26,22 @@
 
 	<issueManagement>
 		<system>github</system>
-		<url>http://github.com/abelaska/jedis-lock/issues</url>
+		<url>https://github.com/MiltonLai/jedis-lock/issues</url>
 	</issueManagement>
 
 	<scm>
-		<url>http://github.com/abelaska/jedis-lock</url>
-		<connection>scm:git:git@github.com:abelaska/jedis-lock.git</connection>
-		<developerConnection>scm:git:git@github.com:abelaska/jedis-lock.git</developerConnection>
+		<url>https://github.com/MiltonLai/jedis-lock</url>
+		<connection>scm:git:git@github.com:MiltonLai/jedis-lock.git</connection>
+		<developerConnection>scm:git:git@github.com:MiltonLai/jedis-lock.git</developerConnection>
 	</scm>
 
 	<developers>
 		<developer>
-			<name>Alois Bělaška</name>
-			<id>abelaska</id>
-			<email>alois.belaska@gmail.com</email>
+			<name>Milton Lai</name>
+			<id>MiltonLai</id>
+			<email>millton.lai@gmail.com</email>
 			<roles>
-				<role>Project Lead</role>
+				<role>Programmer</role>
 			</roles>
 		</developer>
 	</developers>
@@ -56,7 +56,7 @@
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
-			<version>1.5.2</version>
+			<version>3.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -77,10 +77,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.8.0</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.8</source>
+					<target>1.8</target>
 					<optimize>true</optimize>
 					<showDeprecation>true</showDeprecation>
 					<showWarnings>true</showWarnings>
@@ -121,7 +121,7 @@
 				<artifactId>maven-gpg-plugin</artifactId>
 				<version>1.2</version>
 				<configuration>
-				    <keyname>alois.belaska@gmail.com</keyname>
+				    <keyname>millton.lai@gmail.com</keyname>
 				</configuration>
 				<executions>
 					<execution>
