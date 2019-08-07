@@ -1,11 +1,12 @@
 # Jedis-lock
 
 Jedis-lock is easy to use and simple implementation of distributed lock using Redis database and Jedis driver.
+
 Because the [master branch](https://github.com/abelaska/jedis-lock) is no longer updated, this fork will add following features:
 
 * Use LUA scripts instead of `SETNX` for better atomicity
 * ReentrantLock support
-+ JedisCluster support
+* JedisCluster support
 
 ## How to use it?
 
