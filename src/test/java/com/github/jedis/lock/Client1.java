@@ -1,15 +1,23 @@
 package com.github.jedis.lock;
 
-import redis.clients.jedis.JedisPool;
+import com.rockbb.jedis.toolkit.JedisClientBuilder;
+import com.rockbb.jedis.toolkit.JedisGenericClient;
+import com.rockbb.jedis.toolkit.JedisLock;
 import redis.clients.jedis.JedisPoolConfig;
 
 public class Client1 {
     private JedisLock lock;
 
-    public Client1(String host, int port, String password, int database) {
-        JedisPoolConfig config = new JedisPoolConfig();
-        JedisPool pool = new JedisPool(config, host, port, 2000, password, database, "client", false);
-        lock = new JedisLock(pool, "foobar");
+    public Client1(String hosts, String password, int database) {
+        JedisClientBuilder builder = new JedisClientBuilder(
+                new JedisPoolConfig(),
+                hosts,
+                5000,
+                password,
+                database,
+                "client");
+        JedisGenericClient client = builder.getClient();
+        lock = new JedisLock(client, "foobar");
     }
 
     public void show(String in) {
@@ -60,7 +68,7 @@ public class Client1 {
     }
 
     public static void main(String[] args) {
-        Client1 client = new Client1("192.168.31.108", 16379, "foobar", 1);
+        Client1 client = new Client1("192.168.31.108:16379", "foobar", 1);
 
         new Thread(()->{
             while (true) {
