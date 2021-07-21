@@ -5,6 +5,7 @@ import redis.clients.jedis.params.SetParams;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class JedisClusterClient implements JedisGenericClient {
     private JedisCluster cluster;
@@ -141,6 +142,31 @@ public class JedisClusterClient implements JedisGenericClient {
     @Override
     public String set(byte[] key, byte[] value, SetParams params) {
         return cluster.set(key, value, params);
+    }
+
+    @Override
+    public Long sadd(String key, String... members) {
+        return cluster.sadd(key, members);
+    }
+
+    @Override
+    public Set<String> smembers(String key) {
+        return cluster.smembers(key);
+    }
+
+    @Override
+    public Boolean sismember(String key, String member) {
+        return cluster.sismember(key, member);
+    }
+
+    @Override
+    public String spop(String key) {
+        return cluster.spop(key);
+    }
+
+    @Override
+    public Long srem(String key, String... members) {
+        return cluster.srem(key, members);
     }
 
     @Override

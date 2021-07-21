@@ -4,6 +4,7 @@ import redis.clients.jedis.params.SetParams;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface JedisGenericClient {
 
@@ -58,6 +59,16 @@ public interface JedisGenericClient {
     String set(String key, String value, SetParams params);
 
     String set(byte[] key, byte[] value, SetParams params);
+
+    Long sadd(String key, String... members);
+
+    Set<String> smembers(String key);
+
+    Boolean sismember(String key, String member);
+
+    String spop(String key);
+
+    Long srem(String key, String... members);
 
     Long ttl(final String key);
 

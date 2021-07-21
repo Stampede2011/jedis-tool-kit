@@ -6,6 +6,7 @@ import redis.clients.jedis.params.SetParams;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class JedisPooledClient implements JedisGenericClient {
     private JedisPoolAbstract pool;
@@ -142,6 +143,31 @@ public class JedisPooledClient implements JedisGenericClient {
     @Override
     public String set(byte[] key, byte[] value, SetParams params) {
         return (String)execute((Jedis jedis)->jedis.set(key, value, params));
+    }
+
+    @Override
+    public Long sadd(String key, String... members) {
+        return (Long)execute((Jedis jedis)->jedis.sadd(key, members));
+    }
+
+    @Override
+    public Set<String> smembers(String key) {
+        return (Set<String>)execute((Jedis jedis)->jedis.smembers(key));
+    }
+
+    @Override
+    public Boolean sismember(String key, String member) {
+        return (Boolean) execute((Jedis jedis)->jedis.sismember(key, member));
+    }
+
+    @Override
+    public String spop(String key) {
+        return (String) execute((Jedis jedis)->jedis.spop(key));
+    }
+
+    @Override
+    public Long srem(String key, String... members) {
+        return (Long)execute((Jedis jedis)->jedis.srem(key, members));
     }
 
     @Override
