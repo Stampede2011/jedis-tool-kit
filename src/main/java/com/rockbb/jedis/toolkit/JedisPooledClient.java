@@ -146,6 +146,16 @@ public class JedisPooledClient implements JedisGenericClient {
     }
 
     @Override
+    public String setex(String key, int seconds, String value) {
+        return (String)execute((Jedis jedis)->jedis.setex(key, seconds, value));
+    }
+
+    @Override
+    public String setex(byte[] key, int seconds, byte[] value) {
+        return (String)execute((Jedis jedis)->jedis.setex(key, seconds, value));
+    }
+
+    @Override
     public Long sadd(String key, String... members) {
         return (Long)execute((Jedis jedis)->jedis.sadd(key, members));
     }

@@ -145,6 +145,16 @@ public class JedisClusterClient implements JedisGenericClient {
     }
 
     @Override
+    public String setex(String key, int seconds, String value) {
+        return cluster.setex(key, seconds, value);
+    }
+
+    @Override
+    public String setex(byte[] key, int seconds, byte[] value) {
+        return cluster.setex(key, seconds, value);
+    }
+
+    @Override
     public Long sadd(String key, String... members) {
         return cluster.sadd(key, members);
     }

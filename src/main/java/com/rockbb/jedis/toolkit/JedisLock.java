@@ -7,10 +7,10 @@ import redis.clients.jedis.JedisPool;
 
 /**
  * Redis distributed lock implementation
- * (fork by  Bruno Bossola <bbossola@gmail.com>)
- * (fork by  Milton Lai <millton.lai@gmail.com>)
+ * (fork by  Bruno Bossola bbossola@gmail.com)
+ * (fork by  Milton Lai millton.lai@gmail.com)
  * 
- * @author Alois Belaska <alois.belaska@gmail.com>
+ * @author Alois Belaska alois.belaska@gmail.com
  */
 public class JedisLock {
 
@@ -258,6 +258,8 @@ public class JedisLock {
 
     /**
      * Lock threads counter
+     *
+     * @return counter
      */
     public long getCounter() { return counter; }
 

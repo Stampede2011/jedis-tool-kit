@@ -60,6 +60,10 @@ public interface JedisGenericClient {
 
     String set(byte[] key, byte[] value, SetParams params);
 
+    String setex(String key, int seconds, String value);
+
+    String setex(byte[] key, int seconds, byte[] value);
+
     Long sadd(String key, String... members);
 
     Set<String> smembers(String key);
