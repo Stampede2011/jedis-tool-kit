@@ -1,6 +1,8 @@
 package com.rockbb.jedis.toolkit;
 
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.ScanResult;
 import redis.clients.jedis.params.SetParams;
 
 import java.util.List;
@@ -100,6 +102,11 @@ public class JedisClusterClient implements JedisGenericClient {
     }
 
     @Override
+    public Long hlen(byte[] key) {
+        return cluster.hlen(key);
+    }
+
+    @Override
     public Long hset(byte[] key, byte[] field, byte[] value) {
         return cluster.hset(key, field, value);
     }
@@ -122,6 +129,16 @@ public class JedisClusterClient implements JedisGenericClient {
     @Override
     public Long rpush(String key, String... strings) {
         return cluster.rpush(key, strings);
+    }
+
+    @Override
+    public ScanResult<byte[]> scan(byte[] cursor) {
+        return cluster.scan(cursor, new ScanParams());
+    }
+
+    @Override
+    public ScanResult<byte[]> scan(byte[] cursor, ScanParams params) {
+        return cluster.scan(cursor, params);
     }
 
     @Override
@@ -187,5 +204,20 @@ public class JedisClusterClient implements JedisGenericClient {
     @Override
     public Long ttl(byte[] key) {
         return cluster.ttl(key);
+    }
+
+    @Override
+    public Long zcard(byte[] key) {
+        return cluster.zcard(key);
+    }
+
+    @Override
+    public Set<byte[]> zrange(byte[] key, long start, long stop) {
+        return cluster.zrange(key, start, stop);
+    }
+
+    @Override
+    public Long zrem(byte[] key, byte[]... members) {
+        return cluster.zrem(key, members);
     }
 }

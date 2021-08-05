@@ -5,7 +5,7 @@
 	<groupId>com.rockbb.jedis</groupId>
 	<artifactId>jedis-tool-kit</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.0.5-SNAPSHOT</version>
 	<name>Jedis Tool Kit</name>
 	<description>Unified client for pool and cluster basing on Jedis</description>
 	<inceptionYear>2019</inceptionYear>

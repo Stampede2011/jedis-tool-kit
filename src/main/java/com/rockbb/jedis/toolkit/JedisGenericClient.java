@@ -1,5 +1,7 @@
 package com.rockbb.jedis.toolkit;
 
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.ScanResult;
 import redis.clients.jedis.params.SetParams;
 
 import java.util.List;
@@ -42,6 +44,8 @@ public interface JedisGenericClient {
 
     Map<byte[], byte[]> hgetAll(byte[] key);
 
+    Long hlen(byte[] key);
+
     Long hset(byte[] key, byte[] field, byte[] value);
 
     Long llen(String key);
@@ -51,6 +55,10 @@ public interface JedisGenericClient {
     Long pttl(final String key);
 
     Long rpush(String key, String... strings);
+
+    ScanResult<byte[]> scan(byte[] cursor);
+
+    ScanResult<byte[]> scan(byte[] cursor, ScanParams params);
 
     String set(String key, String value);
 
@@ -78,4 +86,9 @@ public interface JedisGenericClient {
 
     Long ttl(byte[] key);
 
+    Long zcard(byte[] key);
+
+    Set<byte[]> zrange(byte[] key, long start, long stop);
+
+    Long zrem(byte[] key, byte[]... members);
 }

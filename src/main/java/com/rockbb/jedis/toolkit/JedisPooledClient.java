@@ -2,6 +2,8 @@ package com.rockbb.jedis.toolkit;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPoolAbstract;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.ScanResult;
 import redis.clients.jedis.params.SetParams;
 
 import java.util.List;
@@ -101,6 +103,11 @@ public class JedisPooledClient implements JedisGenericClient {
     }
 
     @Override
+    public Long hlen(byte[] key) {
+        return (Long)execute((Jedis jedis)->jedis.hlen(key));
+    }
+
+    @Override
     public Long hset(byte[] key, byte[] field, byte[] value) {
         return (Long)execute((Jedis jedis)->jedis.hset(key, field, value));
     }
@@ -123,6 +130,16 @@ public class JedisPooledClient implements JedisGenericClient {
     @Override
     public Long rpush(String key, String... strings) {
         return (Long)execute((Jedis jedis)->jedis.rpush(key, strings));
+    }
+
+    @Override
+    public ScanResult<byte[]> scan(byte[] cursor) {
+        return (ScanResult<byte[]>)execute((Jedis jedis)->jedis.scan(cursor));
+    }
+
+    @Override
+    public ScanResult<byte[]> scan(byte[] cursor, ScanParams params) {
+        return (ScanResult<byte[]>)execute((Jedis jedis)->jedis.scan(cursor, params));
     }
 
     @Override
@@ -188,6 +205,21 @@ public class JedisPooledClient implements JedisGenericClient {
     @Override
     public Long ttl(byte[] key) {
         return (Long)execute((Jedis jedis)->jedis.ttl(key));
+    }
+
+    @Override
+    public Long zcard(byte[] key) {
+        return (Long)execute((Jedis jedis)->jedis.zcard(key));
+    }
+
+    @Override
+    public Set<byte[]> zrange(byte[] key, long start, long stop) {
+        return (Set<byte[]>)execute((Jedis jedis)->jedis.zrange(key, start, stop));
+    }
+
+    @Override
+    public Long zrem(byte[] key, byte[]... members) {
+        return (Long)execute((Jedis jedis)->jedis.zrem(key, members));
     }
 
     private Object execute(RedisCallback callback) {
