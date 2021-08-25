@@ -23,6 +23,11 @@ public class JedisPooledClient implements JedisGenericClient {
     }
 
     @Override
+    public Object eval(String script, List<String> keys, List<String> args) {
+        return execute((Jedis jedis)->jedis.eval(script, keys, args));
+    }
+
+    @Override
     public List<String> blpop(int timeout, String key) {
         return (List<String>)execute((Jedis jedis)->jedis.blpop(timeout, key));
     }
@@ -133,6 +138,16 @@ public class JedisPooledClient implements JedisGenericClient {
     }
 
     @Override
+    public ScanResult<String> scan(String cursor) {
+        return (ScanResult<String>)execute((Jedis jedis)->jedis.scan(cursor));
+    }
+
+    @Override
+    public ScanResult<String> scan(String cursor, ScanParams params) {
+        return (ScanResult<String>)execute((Jedis jedis)->jedis.scan(cursor, params));
+    }
+
+    @Override
     public ScanResult<byte[]> scan(byte[] cursor) {
         return (ScanResult<byte[]>)execute((Jedis jedis)->jedis.scan(cursor));
     }
@@ -208,8 +223,18 @@ public class JedisPooledClient implements JedisGenericClient {
     }
 
     @Override
+    public Long zcard(String key) {
+        return (Long)execute((Jedis jedis)->jedis.zcard(key));
+    }
+
+    @Override
     public Long zcard(byte[] key) {
         return (Long)execute((Jedis jedis)->jedis.zcard(key));
+    }
+
+    @Override
+    public Set<String> zrange(String key, long start, long stop) {
+        return (Set<String>)execute((Jedis jedis)->jedis.zrange(key, start, stop));
     }
 
     @Override
@@ -218,8 +243,33 @@ public class JedisPooledClient implements JedisGenericClient {
     }
 
     @Override
+    public Long zrem(String key, String... members) {
+        return (Long)execute((Jedis jedis)->jedis.zrem(key, members));
+    }
+
+    @Override
     public Long zrem(byte[] key, byte[]... members) {
         return (Long)execute((Jedis jedis)->jedis.zrem(key, members));
+    }
+
+    @Override
+    public Long zremrangeByRank(byte[] key, long start, long stop) {
+        return (Long)execute((Jedis jedis)->jedis.zremrangeByRank(key, start, stop));
+    }
+
+    @Override
+    public Long zremrangeByScore(byte[] key, double min, double max) {
+        return (Long)execute((Jedis jedis)->jedis.zremrangeByScore(key, min, max));
+    }
+
+    @Override
+    public Long zremrangeByScore(byte[] key, byte[] min, byte[] max) {
+        return (Long)execute((Jedis jedis)->jedis.zremrangeByScore(key, min, max));
+    }
+
+    @Override
+    public Long zremrangeByScore(String key, String min, String max) {
+        return (Long)execute((Jedis jedis)->jedis.zremrangeByScore(key, min, max));
     }
 
     private Object execute(RedisCallback callback) {

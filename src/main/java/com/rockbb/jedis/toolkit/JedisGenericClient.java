@@ -10,7 +10,9 @@ import java.util.Set;
 
 public interface JedisGenericClient {
 
-    Object eval(final String script, final int keyCount, final String... params);
+    Object eval(String script, int keyCount, String... params);
+
+    Object eval(String script, List<String> keys, List<String> args);
 
     List<String> blpop(int timeout, String key);
 
@@ -56,6 +58,10 @@ public interface JedisGenericClient {
 
     Long rpush(String key, String... strings);
 
+    ScanResult<String> scan(String cursor);
+
+    ScanResult<String> scan(String cursor, ScanParams params);
+
     ScanResult<byte[]> scan(byte[] cursor);
 
     ScanResult<byte[]> scan(byte[] cursor, ScanParams params);
@@ -86,9 +92,23 @@ public interface JedisGenericClient {
 
     Long ttl(byte[] key);
 
+    Long zcard(String key);
+
     Long zcard(byte[] key);
+
+    Set<String> zrange(String key, long start, long stop);
 
     Set<byte[]> zrange(byte[] key, long start, long stop);
 
+    Long zrem(String key, String... members);
+
     Long zrem(byte[] key, byte[]... members);
+
+    Long zremrangeByRank(byte[] key, long start, long stop);
+
+    Long zremrangeByScore(byte[] key, double min, double max);
+
+    Long zremrangeByScore(byte[] key, byte[] min, byte[] max);
+
+    Long zremrangeByScore(String key, String min, String max);
 }

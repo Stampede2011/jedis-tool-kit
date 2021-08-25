@@ -22,6 +22,10 @@ public class JedisClusterClient implements JedisGenericClient {
     }
 
     @Override
+    public Object eval(String script, List<String> keys, List<String> args) {
+        return cluster.eval(script, keys, args);
+    }
+    @Override
     public List<String> blpop(int timeout, String key) {
         return cluster.blpop(timeout, key);
     }
@@ -132,6 +136,16 @@ public class JedisClusterClient implements JedisGenericClient {
     }
 
     @Override
+    public ScanResult<String> scan(String cursor) {
+        return cluster.scan(cursor, new ScanParams());
+    }
+
+    @Override
+    public ScanResult<String> scan(String cursor, ScanParams params) {
+        return cluster.scan(cursor, params);
+    }
+
+    @Override
     public ScanResult<byte[]> scan(byte[] cursor) {
         return cluster.scan(cursor, new ScanParams());
     }
@@ -207,13 +221,48 @@ public class JedisClusterClient implements JedisGenericClient {
     }
 
     @Override
+    public Long zcard(String key) {
+        return cluster.zcard(key);
+    }
+
+    @Override
     public Long zcard(byte[] key) {
         return cluster.zcard(key);
     }
 
     @Override
+    public Set<String> zrange(String key, long start, long stop) {
+        return cluster.zrange(key, start, stop);
+    }
+
+    @Override
     public Set<byte[]> zrange(byte[] key, long start, long stop) {
         return cluster.zrange(key, start, stop);
+    }
+
+    @Override
+    public Long zrem(String key, String... members) {
+        return cluster.zrem(key, members);
+    }
+
+    @Override
+    public Long zremrangeByRank(byte[] key, long start, long stop) {
+        return cluster.zremrangeByRank(key, start, stop);
+    }
+
+    @Override
+    public Long zremrangeByScore(byte[] key, double min, double max) {
+        return cluster.zremrangeByScore(key, min, max);
+    }
+
+    @Override
+    public Long zremrangeByScore(byte[] key, byte[] min, byte[] max) {
+        return cluster.zremrangeByScore(key, min, max);
+    }
+
+    @Override
+    public Long zremrangeByScore(String key, String min, String max) {
+        return cluster.zremrangeByScore(key, min, max);
     }
 
     @Override
