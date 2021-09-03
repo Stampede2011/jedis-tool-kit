@@ -387,6 +387,26 @@ public class JedisClusterClient implements JedisGenericClient {
     }
 
     @Override
+    public Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min, int offset, int count) {
+        return cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
+    }
+
+    @Override
+    public Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min) {
+        return cluster.zrevrangeByScoreWithScores(key, max, min);
+    }
+
+    @Override
+    public Set<Tuple> zrevrangeByScoreWithScores(String key, String max, String min, int offset, int count) {
+        return cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
+    }
+
+    @Override
+    public Set<Tuple> zrevrangeByScoreWithScores(String key, String max, String min) {
+        return cluster.zrevrangeByScoreWithScores(key, max, min);
+    }
+
+    @Override
     public Double zscore(String key, String member) {
         return cluster.zscore(key, member);
     }

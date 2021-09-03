@@ -159,6 +159,14 @@ public interface JedisGenericClient {
 
     Set<Tuple> zrevrangeByScoreWithScores(byte[] key, byte[] max, byte[] min, int offset, int count);
 
+    Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min, int offset, int count);
+
+    Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min);
+
+    Set<Tuple> zrevrangeByScoreWithScores(String key, String max, String min, int offset, int count);
+
+    Set<Tuple> zrevrangeByScoreWithScores(String key, String max, String min);
+
     Double zscore(String key, String member);
 
     Double zscore(byte[] key, byte[] member);
