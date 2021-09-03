@@ -3,6 +3,7 @@ package com.rockbb.jedis.toolkit;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
+import redis.clients.jedis.Tuple;
 import redis.clients.jedis.params.SetParams;
 
 import java.util.List;
@@ -96,7 +97,17 @@ public class JedisClusterClient implements JedisGenericClient {
     }
 
     @Override
+    public Long hdel(byte[] key, byte[]... fields) {
+        return cluster.hdel(key, fields);
+    }
+
+    @Override
     public byte[] hget(byte[] key, byte[] field) {
+        return cluster.hget(key, field);
+    }
+
+    @Override
+    public String hget(String key, String field) {
         return cluster.hget(key, field);
     }
 
@@ -108,6 +119,16 @@ public class JedisClusterClient implements JedisGenericClient {
     @Override
     public Long hlen(byte[] key) {
         return cluster.hlen(key);
+    }
+
+    @Override
+    public Long hlen(String key) {
+        return cluster.hlen(key);
+    }
+
+    @Override
+    public Long hset(String key, String field, String value) {
+        return cluster.hset(key, field, value);
     }
 
     @Override
@@ -123,6 +144,16 @@ public class JedisClusterClient implements JedisGenericClient {
     @Override
     public Long lpush(String key, String... strings) {
         return cluster.lpush(key, strings);
+    }
+
+    @Override
+    public Long pexpire(String key, long milliseconds) {
+        return cluster.pexpire(key, milliseconds);
+    }
+
+    @Override
+    public Long pexpire(byte[] key, long milliseconds) {
+        return cluster.pexpire(key, milliseconds);
     }
 
     @Override
@@ -221,6 +252,16 @@ public class JedisClusterClient implements JedisGenericClient {
     }
 
     @Override
+    public Long zadd(String key, double score, String member) {
+        return cluster.zadd(key, score, member);
+    }
+
+    @Override
+    public Long zadd(byte[] key, double score, byte[] member) {
+        return cluster.zadd(key, score, member);
+    }
+
+    @Override
     public Long zcard(String key) {
         return cluster.zcard(key);
     }
@@ -241,7 +282,27 @@ public class JedisClusterClient implements JedisGenericClient {
     }
 
     @Override
+    public Set<String> zrangeByScore(String key, double min, double max) {
+        return cluster.zrangeByScore(key, min, max);
+    }
+
+    @Override
+    public Set<String> zrangeByScore(String key, String min, String max) {
+        return cluster.zrangeByScore(key, min, max);
+    }
+
+    @Override
+    public Set<byte[]> zrangeByScore(byte[] key, byte[] min, byte[] max) {
+        return cluster.zrangeByScore(key, min, max);
+    }
+
+    @Override
     public Long zrem(String key, String... members) {
+        return cluster.zrem(key, members);
+    }
+
+    @Override
+    public Long zrem(byte[] key, byte[]... members) {
         return cluster.zrem(key, members);
     }
 
@@ -266,7 +327,72 @@ public class JedisClusterClient implements JedisGenericClient {
     }
 
     @Override
-    public Long zrem(byte[] key, byte[]... members) {
-        return cluster.zrem(key, members);
+    public Set<Tuple> zrangeByScoreWithScores(byte[] key, double min, double max) {
+        return cluster.zrangeByScoreWithScores(key, min, max);
+    }
+
+    @Override
+    public Set<Tuple> zrangeByScoreWithScores(byte[] key, byte[] min, byte[] max) {
+        return cluster.zrangeByScoreWithScores(key, min, max);
+    }
+
+    @Override
+    public Set<Tuple> zrangeByScoreWithScores(byte[] key, double min, double max, int offset, int count) {
+        return cluster.zrangeByScoreWithScores(key, min, max, offset, count);
+    }
+
+    @Override
+    public Set<Tuple> zrangeByScoreWithScores(byte[] key, byte[] min, byte[] max, int offset, int count) {
+        return cluster.zrangeByScoreWithScores(key, min, max, offset, count);
+    }
+
+    @Override
+    public Set<byte[]> zrevrangeByScore(byte[] key, double max, double min) {
+        return cluster.zrevrangeByScore(key, max, min);
+    }
+
+    @Override
+    public Set<byte[]> zrevrangeByScore(byte[] key, byte[] max, byte[] min) {
+        return cluster.zrevrangeByScore(key, max, min);
+    }
+
+    @Override
+    public Set<byte[]> zrevrangeByScore(byte[] key, double max, double min, int offset, int count) {
+        return cluster.zrevrangeByScore(key, max, min, offset, count);
+    }
+
+    @Override
+    public Set<byte[]> zrevrangeByScore(byte[] key, byte[] max, byte[] min, int offset, int count) {
+        return cluster.zrevrangeByScore(key, max, min, offset, count);
+    }
+
+    @Override
+    public Set<Tuple> zrevrangeByScoreWithScores(byte[] key, double max, double min) {
+        return cluster.zrevrangeByScoreWithScores(key, max, min);
+    }
+
+    @Override
+    public Set<Tuple> zrevrangeByScoreWithScores(byte[] key, double max, double min, int offset, int count) {
+        return cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
+    }
+
+    @Override
+    public Set<Tuple> zrevrangeByScoreWithScores(byte[] key, byte[] max, byte[] min) {
+        return cluster.zrevrangeByScoreWithScores(key, max, min);
+    }
+
+    @Override
+    public Set<Tuple> zrevrangeByScoreWithScores(byte[] key, byte[] max, byte[] min, int offset, int count) {
+        return cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
+    }
+
+    @Override
+    public Double zscore(String key, String member) {
+        return cluster.zscore(key, member);
+    }
+
+    @Override
+    public Double zscore(byte[] key, byte[] member) {
+        return cluster.zscore(key, member);
     }
 }

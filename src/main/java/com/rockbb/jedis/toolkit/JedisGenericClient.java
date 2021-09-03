@@ -2,6 +2,7 @@ package com.rockbb.jedis.toolkit;
 
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
+import redis.clients.jedis.Tuple;
 import redis.clients.jedis.params.SetParams;
 
 import java.util.List;
@@ -42,17 +43,29 @@ public interface JedisGenericClient {
 
     Long hdel(String key, String... fields);
 
+    Long hdel(byte[] key, byte[]... fields);
+
     byte[] hget(byte[] key, byte[] field);
+
+    String hget(String key, String field);
 
     Map<byte[], byte[]> hgetAll(byte[] key);
 
     Long hlen(byte[] key);
+
+    Long hlen(String key);
+
+    Long hset(String key, String field, String value);
 
     Long hset(byte[] key, byte[] field, byte[] value);
 
     Long llen(String key);
 
     Long lpush(String key, String... strings);
+
+    Long pexpire(String key, long milliseconds);
+
+    Long pexpire(byte[] key, long milliseconds);
 
     Long pttl(final String key);
 
@@ -92,6 +105,10 @@ public interface JedisGenericClient {
 
     Long ttl(byte[] key);
 
+    Long zadd(String key, double score, String member);
+
+    Long zadd(byte[] key, double score, byte[] member);
+
     Long zcard(String key);
 
     Long zcard(byte[] key);
@@ -99,6 +116,12 @@ public interface JedisGenericClient {
     Set<String> zrange(String key, long start, long stop);
 
     Set<byte[]> zrange(byte[] key, long start, long stop);
+
+    Set<String> zrangeByScore(String key, double min, double max);
+
+    Set<String> zrangeByScore(String key, String min, String max);
+
+    Set<byte[]> zrangeByScore(byte[] key, byte[] min, byte[] max);
 
     Long zrem(String key, String... members);
 
@@ -111,4 +134,32 @@ public interface JedisGenericClient {
     Long zremrangeByScore(byte[] key, byte[] min, byte[] max);
 
     Long zremrangeByScore(String key, String min, String max);
+
+    Set<Tuple> zrangeByScoreWithScores(byte[] key, double min, double max);
+
+    Set<Tuple> zrangeByScoreWithScores(byte[] key, byte[] min, byte[] max);
+
+    Set<Tuple> zrangeByScoreWithScores(byte[] key, double min, double max, int offset, int count);
+
+    Set<Tuple> zrangeByScoreWithScores(byte[] key, byte[] min, byte[] max, int offset, int count);
+
+    Set<byte[]> zrevrangeByScore(byte[] key, double max, double min);
+
+    Set<byte[]> zrevrangeByScore(byte[] key, byte[] max, byte[] min);
+
+    Set<byte[]> zrevrangeByScore(byte[] key, double max, double min, int offset, int count);
+
+    Set<byte[]> zrevrangeByScore(byte[] key, byte[] max, byte[] min, int offset, int count);
+
+    Set<Tuple> zrevrangeByScoreWithScores(byte[] key, double max, double min);
+
+    Set<Tuple> zrevrangeByScoreWithScores(byte[] key, double max, double min, int offset, int count);
+
+    Set<Tuple> zrevrangeByScoreWithScores(byte[] key, byte[] max, byte[] min);
+
+    Set<Tuple> zrevrangeByScoreWithScores(byte[] key, byte[] max, byte[] min, int offset, int count);
+
+    Double zscore(String key, String member);
+
+    Double zscore(byte[] key, byte[] member);
 }
