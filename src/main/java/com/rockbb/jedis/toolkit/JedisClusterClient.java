@@ -1,10 +1,10 @@
 package com.rockbb.jedis.toolkit;
 
 import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.ScanParams;
-import redis.clients.jedis.ScanResult;
-import redis.clients.jedis.Tuple;
+import redis.clients.jedis.params.ScanParams;
 import redis.clients.jedis.params.SetParams;
+import redis.clients.jedis.resps.ScanResult;
+import redis.clients.jedis.resps.Tuple;
 
 import java.util.List;
 import java.util.Map;
@@ -273,27 +273,27 @@ public class JedisClusterClient implements JedisGenericClient {
 
     @Override
     public Set<String> zrange(String key, long start, long stop) {
-        return cluster.zrange(key, start, stop);
+        return (Set<String>)cluster.zrange(key, start, stop);
     }
 
     @Override
     public Set<byte[]> zrange(byte[] key, long start, long stop) {
-        return cluster.zrange(key, start, stop);
+        return (Set<byte[]>)cluster.zrange(key, start, stop);
     }
 
     @Override
     public Set<String> zrangeByScore(String key, double min, double max) {
-        return cluster.zrangeByScore(key, min, max);
+        return (Set<String>)cluster.zrangeByScore(key, min, max);
     }
 
     @Override
     public Set<String> zrangeByScore(String key, String min, String max) {
-        return cluster.zrangeByScore(key, min, max);
+        return (Set<String>)cluster.zrangeByScore(key, min, max);
     }
 
     @Override
     public Set<byte[]> zrangeByScore(byte[] key, byte[] min, byte[] max) {
-        return cluster.zrangeByScore(key, min, max);
+        return (Set<byte[]>)cluster.zrangeByScore(key, min, max);
     }
 
     @Override
@@ -328,82 +328,82 @@ public class JedisClusterClient implements JedisGenericClient {
 
     @Override
     public Set<Tuple> zrangeByScoreWithScores(byte[] key, double min, double max) {
-        return cluster.zrangeByScoreWithScores(key, min, max);
+        return (Set<Tuple>)cluster.zrangeByScoreWithScores(key, min, max);
     }
 
     @Override
     public Set<Tuple> zrangeByScoreWithScores(byte[] key, byte[] min, byte[] max) {
-        return cluster.zrangeByScoreWithScores(key, min, max);
+        return (Set<Tuple>)cluster.zrangeByScoreWithScores(key, min, max);
     }
 
     @Override
     public Set<Tuple> zrangeByScoreWithScores(byte[] key, double min, double max, int offset, int count) {
-        return cluster.zrangeByScoreWithScores(key, min, max, offset, count);
+        return (Set<Tuple>)cluster.zrangeByScoreWithScores(key, min, max, offset, count);
     }
 
     @Override
     public Set<Tuple> zrangeByScoreWithScores(byte[] key, byte[] min, byte[] max, int offset, int count) {
-        return cluster.zrangeByScoreWithScores(key, min, max, offset, count);
+        return (Set<Tuple>)cluster.zrangeByScoreWithScores(key, min, max, offset, count);
     }
 
     @Override
     public Set<byte[]> zrevrangeByScore(byte[] key, double max, double min) {
-        return cluster.zrevrangeByScore(key, max, min);
+        return (Set<byte[]>)cluster.zrevrangeByScore(key, max, min);
     }
 
     @Override
     public Set<byte[]> zrevrangeByScore(byte[] key, byte[] max, byte[] min) {
-        return cluster.zrevrangeByScore(key, max, min);
+        return (Set<byte[]>)cluster.zrevrangeByScore(key, max, min);
     }
 
     @Override
     public Set<byte[]> zrevrangeByScore(byte[] key, double max, double min, int offset, int count) {
-        return cluster.zrevrangeByScore(key, max, min, offset, count);
+        return (Set<byte[]>)cluster.zrevrangeByScore(key, max, min, offset, count);
     }
 
     @Override
     public Set<byte[]> zrevrangeByScore(byte[] key, byte[] max, byte[] min, int offset, int count) {
-        return cluster.zrevrangeByScore(key, max, min, offset, count);
+        return (Set<byte[]>)cluster.zrevrangeByScore(key, max, min, offset, count);
     }
 
     @Override
     public Set<Tuple> zrevrangeByScoreWithScores(byte[] key, double max, double min) {
-        return cluster.zrevrangeByScoreWithScores(key, max, min);
+        return (Set<Tuple>)cluster.zrevrangeByScoreWithScores(key, max, min);
     }
 
     @Override
     public Set<Tuple> zrevrangeByScoreWithScores(byte[] key, double max, double min, int offset, int count) {
-        return cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
+        return (Set<Tuple>)cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
     }
 
     @Override
     public Set<Tuple> zrevrangeByScoreWithScores(byte[] key, byte[] max, byte[] min) {
-        return cluster.zrevrangeByScoreWithScores(key, max, min);
+        return (Set<Tuple>)cluster.zrevrangeByScoreWithScores(key, max, min);
     }
 
     @Override
     public Set<Tuple> zrevrangeByScoreWithScores(byte[] key, byte[] max, byte[] min, int offset, int count) {
-        return cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
+        return (Set<Tuple>)cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
     }
 
     @Override
     public Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min, int offset, int count) {
-        return cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
+        return (Set<Tuple>)cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
     }
 
     @Override
     public Set<Tuple> zrevrangeByScoreWithScores(String key, double max, double min) {
-        return cluster.zrevrangeByScoreWithScores(key, max, min);
+        return (Set<Tuple>)cluster.zrevrangeByScoreWithScores(key, max, min);
     }
 
     @Override
     public Set<Tuple> zrevrangeByScoreWithScores(String key, String max, String min, int offset, int count) {
-        return cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
+        return (Set<Tuple>)cluster.zrevrangeByScoreWithScores(key, max, min, offset, count);
     }
 
     @Override
     public Set<Tuple> zrevrangeByScoreWithScores(String key, String max, String min) {
-        return cluster.zrevrangeByScoreWithScores(key, max, min);
+        return (Set<Tuple>)cluster.zrevrangeByScoreWithScores(key, max, min);
     }
 
     @Override

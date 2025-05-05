@@ -1,15 +1,16 @@
 package com.rockbb.jedis.toolkit;
 
-import java.util.UUID;
-
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPooled;
+
+import java.util.UUID;
 
 /**
  * Redis distributed lock implementation
  * (fork by  Bruno Bossola bbossola@gmail.com)
  * (fork by  Milton Lai millton.lai@gmail.com)
- * 
+ *
  * @author Alois Belaska alois.belaska@gmail.com
  */
 public class JedisLock {
@@ -90,7 +91,7 @@ public class JedisLock {
      *            lock expiration in miliseconds (default: 60000 msecs)
      */
     public JedisLock(JedisPool pool, String lockKey, int acquireTimeoutMillis, int expiryTimeMillis) {
-        this.client = new JedisPooledClient(pool);
+        this.client = new JedisPoolClient(pool);
         this.lockKeyPath = lockKey;
         this.acquiryTimeoutInMillis = acquireTimeoutMillis;
         this.lockExpiryInMillis = expiryTimeMillis+1;
@@ -193,6 +194,39 @@ public class JedisLock {
         this.acquiryTimeoutInMillis = acquireTimeoutMillis;
         this.lockExpiryInMillis = expiryTimeMillis+1;
         this.lockUUID = uuid;
+    }
+
+    /**
+     * Detailed constructor with default acquire timeout 10000 msecs and lock
+     * expiration of 60000 msecs.
+     *
+     * @param pooled
+     *            JedisPooled
+     * @param lockKey
+     *            lock key (ex. account:1, ...)
+     */
+    public JedisLock(JedisPooled pooled, String lockKey) {
+        this(pooled, lockKey, DEFAULT_ACQUIRE_TIMEOUT_MILLIS, DEFAULT_EXPIRY_TIME_MILLIS);
+    }
+
+    /**
+     * Detailed constructor.
+     *
+     * @param pooled
+     *            JedisPooled
+     * @param lockKey
+     *            lock key (ex. account:1, ...)
+     * @param acquireTimeoutMillis
+     *            acquire timeout in miliseconds (default: 10000 msecs)
+     * @param expiryTimeMillis
+     *            lock expiration in miliseconds (default: 60000 msecs)
+     */
+    public JedisLock(JedisPooled pooled, String lockKey, int acquireTimeoutMillis, int expiryTimeMillis) {
+        this.client = new JedisPooledClient(pooled);
+        this.lockKeyPath = lockKey;
+        this.acquiryTimeoutInMillis = acquireTimeoutMillis;
+        this.lockExpiryInMillis = expiryTimeMillis+1;
+        this.lockUUID = UUID.randomUUID();
     }
 
     /**

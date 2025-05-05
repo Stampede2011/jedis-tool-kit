@@ -37,7 +37,7 @@ public class JedisClientBuilder {
             }
             JedisPool pool = new JedisPool(
                     poolConfig, hostParts[0], Integer.parseInt(hostParts[1]), timeout, password, database, clientName);
-            this.client = new JedisPooledClient(pool);
+            this.client = new JedisPoolClient(pool);
         }
     }
 
